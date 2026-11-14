@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import { haptic } from '../bridge.js';
 
 // Minimal hyperscript helper: h('div.class', { onclick, style, ... }, ...children)
@@ -158,7 +159,7 @@ const PAD_MIN_SAT = 0.12;
 
 export function createColorPad({ value, onInput }) {
   const thumb = h('div.pad-thumb');
-  const el = h('div.pad', { role: 'slider', tabindex: 0, 'aria-label': 'Colour' }, thumb);
+  const el = h('div.pad', { role: 'slider', tabindex: 0, 'aria-label': t('Colour') }, thumb);
   let dragging = false;
 
   const place = (x, y, hex) => {

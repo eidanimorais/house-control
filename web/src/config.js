@@ -1,6 +1,8 @@
 // Loads and normalises a floor plan ("home.json"). Everything the 3D scene and the UI
 // know about the apartment comes from this one document, so swapping the file swaps the home.
 
+import { localizeBundledPlan } from './i18n.js';
+
 const LIGHT_TYPES = ['ceiling', 'pendant', 'spots', 'floor', 'table', 'strip'];
 const WALLS = ['north', 'south', 'east', 'west'];
 
@@ -38,7 +40,7 @@ export async function loadRawConfig() {
   const res = await fetch(`./plans/${plan}.json`);
   if (!res.ok) throw new ConfigError(`Plan "${plan}" not found (HTTP ${res.status})`);
   try {
-    return await res.json();
+    return localizeBundledPlan(await res.json());
   } catch (e) {
     throw new ConfigError(`Plan "${plan}" is not valid JSON: ${e.message}`);
   }

@@ -183,38 +183,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if NSApp.currentEvent?.type == .rightMouseUp {
             panel.hide()
             let menu = NSMenu()
-            let settingsItem = menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+            let settingsItem = menu.addItem(withTitle: L10n.text("Settings…"), action: #selector(openSettings), keyEquivalent: ",")
             settingsItem.target = self
             settingsItem.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
             menu.addItem(.separator())
-            menu.addItem(withTitle: "Edit Home…", action: #selector(openEditor), keyEquivalent: "").target = self
-            menu.addItem(withTitle: "Load Floor Plan…", action: #selector(loadPlan), keyEquivalent: "").target = self
-            menu.addItem(withTitle: "Reveal Plan File", action: #selector(revealPlan), keyEquivalent: "").target = self
-            menu.addItem(withTitle: "Reveal Device Log", action: #selector(revealLog), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.text("Edit Home…"), action: #selector(openEditor), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.text("Load Floor Plan…"), action: #selector(loadPlan), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.text("Reveal Plan File"), action: #selector(revealPlan), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.text("Reveal Device Log"), action: #selector(revealLog), keyEquivalent: "").target = self
             menu.addItem(.separator())
-            let islandItem = menu.addItem(withTitle: "Show Island", action: #selector(toggleIsland), keyEquivalent: "")
+            let islandItem = menu.addItem(withTitle: L10n.text("Show Island"), action: #selector(toggleIsland), keyEquivalent: "")
             islandItem.target = self
             islandItem.state = island?.isShown == true ? .on : .off
             let login = LoginItem.state
-            let loginItem = menu.addItem(withTitle: login == .needsApproval ? "Open at Login — Allow in Settings…" : "Open at Login",
+            let loginItem = menu.addItem(withTitle: login == .needsApproval ? L10n.text("Open at Login — Allow in Settings…") : L10n.text("Open at Login"),
                                          action: #selector(toggleOpenAtLogin), keyEquivalent: "")
             loginItem.target = self
             loginItem.state = login == .on ? .on : login == .needsApproval ? .mixed : .off
-            menu.addItem(withTitle: "Pair iPhone…", action: #selector(pairPhone), keyEquivalent: "").target = self
-            let aiItem = menu.addItem(withTitle: agent.isLive ? "AI Access — Live" : "AI Access…", action: #selector(openAgent), keyEquivalent: "")
+            menu.addItem(withTitle: L10n.text("Pair iPhone…"), action: #selector(pairPhone), keyEquivalent: "").target = self
+            let aiItem = menu.addItem(withTitle: agent.isLive ? L10n.text("AI Access — Live") : L10n.text("AI Access…"), action: #selector(openAgent), keyEquivalent: "")
             aiItem.target = self
             aiItem.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
             if agent.isLive {
-                menu.addItem(withTitle: "Stop AI Access", action: #selector(stopAgent), keyEquivalent: "").target = self
+                menu.addItem(withTitle: L10n.text("Stop AI Access"), action: #selector(stopAgent), keyEquivalent: "").target = self
             }
             for device in sync.connectedDevices {
-                let item = menu.addItem(withTitle: "\(device) is connected", action: nil, keyEquivalent: "")
+                let item = menu.addItem(withTitle: L10n.text("{name} is connected", ["name": device]), action: nil, keyEquivalent: "")
                 item.image = NSImage(systemSymbolName: "iphone", accessibilityDescription: nil)
             }
             menu.addItem(.separator())
             menu.addItem(aboutMenuItem())
-            menu.addItem(withTitle: "Reload", action: #selector(reloadAll), keyEquivalent: "").target = self
-            menu.addItem(withTitle: "Quit House Control", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+            menu.addItem(withTitle: L10n.text("Reload"), action: #selector(reloadAll), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.text("Quit House Control"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
             statusItem.menu = menu
             statusItem.button?.performClick(nil)
             statusItem.menu = nil
@@ -280,7 +280,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.hide()
         NSApp.activate(ignoringOtherApps: true)
         let open = NSOpenPanel()
-        open.title = "Choose a floor plan"
+        open.title = L10n.text("Choose a floor plan")
         open.allowedContentTypes = [.json]
         guard open.runModal() == .OK, let url = open.url else { return }
         do {
@@ -288,7 +288,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             reloadAll()
             editor?.host.load()
         } catch {
-            alert("Could not load this floor plan", error.localizedDescription)
+            alert(L10n.text("Could not load this floor plan"), error.localizedDescription)
         }
     }
 
@@ -304,13 +304,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         about.addItem(withTitle: "House Control\(version.map { " \($0)" } ?? "")", action: nil, keyEquivalent: "")
         about.addItem(.separator())
         let links: [(String, String, URL)] = [
-            ("Website", "globe", About.website),
-            ("Privacy Policy", "hand.raised", About.privacy),
-            ("Support", "questionmark.circle", About.support),
+            (L10n.text("Website"), "globe", About.website),
+            (L10n.text("Privacy Policy"), "hand.raised", About.privacy),
+            (L10n.text("Support"), "questionmark.circle", About.support),
             ("", "", About.website),
             ("\(About.developer) on X", "at", About.x),
             ("\(About.developer) on GitHub", "chevron.left.forwardslash.chevron.right", About.github),
-            ("Source Code", "shippingbox", About.source),
+            (L10n.text("Source Code"), "shippingbox", About.source),
         ]
         for (title, symbol, url) in links {
             guard !title.isEmpty else { about.addItem(.separator()); continue }
@@ -319,7 +319,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             item.representedObject = url
             item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
         }
-        let item = NSMenuItem(title: "About House Control", action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: L10n.text("About House Control"), action: nil, keyEquivalent: "")
         item.submenu = about
         return item
     }
@@ -788,9 +788,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.openAtLogin = LoginItem.state
         model.islandShown = island?.isShown == true
         var choices = PlanStore.bundled.map { id in
-            SettingsModel.Plan(id: id, name: "Demo · \(id == "home" ? "Apartment" : id.capitalized)")
+            SettingsModel.Plan(id: id, name: L10n.text(id == "home" ? "Demo · Apartment" : "Demo · Studio"))
         }
-        if plans.hasCustomPlan { choices.insert(.init(id: "custom", name: plans.customPlanName ?? "My home"), at: 0) }
+        if plans.hasCustomPlan { choices.insert(.init(id: "custom", name: plans.customPlanName ?? L10n.text("My home")), at: 0) }
         model.plans = choices
         model.activePlan = plans.activePlan
         let info = hub.servicesInfo
@@ -799,16 +799,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let homeKit = entry("homekit")
         model.connections = [
             .init(id: "smartlife", name: "Smart Life", symbol: "bolt.horizontal.fill", tint: .orange,
-                  detail: connected("smartlife") ? "Signed in" : "Not signed in", connected: connected("smartlife")),
+                  detail: connected("smartlife") ? L10n.text("Signed in") : L10n.text("Not signed in"), connected: connected("smartlife")),
             .init(id: "homeassistant", name: "Home Assistant", symbol: "house.and.flag.fill", tint: .blue,
-                  detail: connected("homeassistant") ? entry("homeassistant")["name"] as? String ?? "Connected" : "Not connected",
+                  detail: connected("homeassistant") ? entry("homeassistant")["name"] as? String ?? L10n.text("Connected") : L10n.text("Not connected"),
                   connected: connected("homeassistant")),
             .init(id: "hue", name: "Philips Hue", symbol: "lightbulb.2.fill", tint: .indigo,
-                  detail: connected("hue") ? entry("hue")["name"] as? String ?? "Connected" : "Not paired", connected: connected("hue")),
+                  detail: connected("hue") ? entry("hue")["name"] as? String ?? L10n.text("Connected") : L10n.text("Not paired"), connected: connected("hue")),
             .init(id: "homekit", name: "Apple Home", symbol: "homekit", tint: .yellow,
                   detail: connected("homekit")
-                    ? "\(homeKit["count"] as? Int ?? 0) devices, from \(homeKit["from"] as? String ?? "your iPhone")"
-                    : "Comes from a paired iPhone", connected: connected("homekit")),
+                    ? L10n.text("{count} devices, from {phone}", ["count": String(homeKit["count"] as? Int ?? 0), "phone": homeKit["from"] as? String ?? L10n.text("your iPhone")])
+                    : L10n.text("Comes from a paired iPhone"), connected: connected("homekit")),
         ]
         model.phones = sync.connectedDevices
         model.aiLive = agent.isLive
@@ -820,30 +820,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let main = NSMenu()
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "About House Control", action: #selector(openAbout), keyEquivalent: "").target = self
+        appMenu.addItem(withTitle: L10n.text("About House Control"), action: #selector(openAbout), keyEquivalent: "").target = self
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",").target = self
+        appMenu.addItem(withTitle: L10n.text("Settings…"), action: #selector(openSettings), keyEquivalent: ",").target = self
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit House Control", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: L10n.text("Quit House Control"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
         main.addItem(appItem)
 
         let editItem = NSMenuItem()
-        let edit = NSMenu(title: "Edit")
-        edit.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
-        edit.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        let edit = NSMenu(title: L10n.text("Edit"))
+        edit.addItem(withTitle: L10n.text("Undo"), action: Selector(("undo:")), keyEquivalent: "z")
+        edit.addItem(withTitle: L10n.text("Redo"), action: Selector(("redo:")), keyEquivalent: "Z")
         edit.addItem(.separator())
-        edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        edit.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        edit.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        edit.addItem(withTitle: L10n.text("Cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: L10n.text("Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: L10n.text("Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: L10n.text("Select All"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
         editItem.submenu = edit
         main.addItem(editItem)
 
         let windowItem = NSMenuItem()
-        let window = NSMenu(title: "Window")
-        window.addItem(withTitle: "Close", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
-        window.addItem(withTitle: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
+        let window = NSMenu(title: L10n.text("Window"))
+        window.addItem(withTitle: L10n.text("Close"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        window.addItem(withTitle: L10n.text("Minimize"), action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
         windowItem.submenu = window
         main.addItem(windowItem)
         NSApp.mainMenu = main

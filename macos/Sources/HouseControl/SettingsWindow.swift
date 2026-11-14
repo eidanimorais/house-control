@@ -62,10 +62,11 @@ final class SettingsWindowController: NSWindowController {
         for (title, symbol, view) in panes {
             let host = NSHostingController(rootView: view.environmentObject(model))
             host.sizingOptions = .preferredContentSize
-            host.title = title // the tab controller names the window after the pane on show
+            host.title = L10n.text(title) // the tab controller names the window after the pane on show
             let item = NSTabViewItem(viewController: host)
-            item.label = title
-            item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+            item.label = L10n.text(title)
+            item.identifier = title
+            item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: L10n.text(title))
             tabs.addTabViewItem(item)
         }
         let window = NSWindow(contentViewController: tabs)
@@ -89,7 +90,7 @@ final class SettingsWindowController: NSWindowController {
     func show(pane: String? = nil) {
         onShow?()
         if let pane, let tabs = window?.contentViewController as? NSTabViewController,
-           let index = tabs.tabViewItems.firstIndex(where: { $0.label == pane }) {
+           let index = tabs.tabViewItems.firstIndex(where: { ($0.identifier as? String) == pane }) {
             tabs.selectedTabViewItemIndex = index
         }
         NSApp.activate(ignoringOtherApps: true)
@@ -120,27 +121,27 @@ private struct GeneralPane: View {
     var body: some View {
         Pane {
             Section {
-                Toggle("Open at Login", isOn: Binding(get: { model.openAtLogin == .on }, set: model.setOpenAtLogin))
+                Toggle(L10n.text("Open at Login"), isOn: Binding(get: { model.openAtLogin == .on }, set: model.setOpenAtLogin))
                 if model.openAtLogin == .needsApproval {
                     LabeledContent {
-                        Button("Open Login Items…") { model.setOpenAtLogin(true) }
+                        Button(L10n.text("Open Login Items…")) { model.setOpenAtLogin(true) }
                     } label: {
-                        Text("Waiting for your OK in System Settings → General → Login Items.")
+                        Text(L10n.text("Waiting for your OK in System Settings → General → Login Items."))
                             .foregroundStyle(.secondary)
                     }
                 }
             } footer: {
-                Footnote("House Control starts with your Mac and waits in the menu bar.")
+                Footnote(L10n.text("House Control starts with your Mac and waits in the menu bar."))
             }
             Section {
-                Toggle("Show the Island", isOn: Binding(get: { model.islandShown }, set: model.setIsland))
+                Toggle(L10n.text("Show the Island"), isOn: Binding(get: { model.islandShown }, set: model.setIsland))
             } footer: {
-                Footnote("Lamps on, the AC and scenes at a glance, in the middle of the menu bar. Click it to open it up.")
+                Footnote(L10n.text("Lamps on, the AC and scenes at a glance, in the middle of the menu bar. Click it to open it up."))
             }
-            Section("Getting around") {
-                Tip(symbol: "cursorarrow.click", text: "Click the house in the menu bar for the panel.")
-                Tip(symbol: "contextualmenu.and.cursorarrow", text: "Right-click it for the menu: editor, iPhone, AI Access.")
-                Tip(symbol: "command", text: "⌘, opens these settings from any House Control window.")
+            Section(L10n.text("Getting around")) {
+                Tip(symbol: "cursorarrow.click", text: L10n.text("Click the house in the menu bar for the panel."))
+                Tip(symbol: "contextualmenu.and.cursorarrow", text: L10n.text("Right-click it for the menu: editor, iPhone, AI Access."))
+                Tip(symbol: "command", text: L10n.text("⌘, opens these settings from any House Control window."))
             }
         }
     }
@@ -152,17 +153,17 @@ private struct HomePane: View {
     var body: some View {
         Pane {
             Section {
-                Picker("Floor plan", selection: Binding(get: { model.activePlan }, set: model.selectPlan)) {
+                Picker(L10n.text("Floor plan"), selection: Binding(get: { model.activePlan }, set: model.selectPlan)) {
                     ForEach(model.plans) { Text($0.name).tag($0.id) }
                 }
                 .pickerStyle(.radioGroup)
             } footer: {
-                Footnote("Draw your own home in the editor, or load a plan file. The demos are simulated: nothing real switches.")
+                Footnote(L10n.text("Draw your own home in the editor, or load a plan file. The demos are simulated: nothing real switches."))
             }
             Section {
-                ActionRow(symbol: "pencil.and.ruler", title: "Edit Home…", detail: "Rooms, lamps, ACs, furniture and scenes", action: model.editHome)
-                ActionRow(symbol: "square.and.arrow.down", title: "Load Floor Plan…", detail: "A plan file from another Mac or a backup", action: model.loadPlan)
-                ActionRow(symbol: "folder", title: "Reveal Plan File", detail: "The plan as JSON, in the Finder", action: model.revealPlan)
+                ActionRow(symbol: "pencil.and.ruler", title: L10n.text("Edit Home…"), detail: L10n.text("Rooms, lamps, ACs, furniture and scenes"), action: model.editHome)
+                ActionRow(symbol: "square.and.arrow.down", title: L10n.text("Load Floor Plan…"), detail: L10n.text("A plan file from another Mac or a backup"), action: model.loadPlan)
+                ActionRow(symbol: "folder", title: L10n.text("Reveal Plan File"), detail: L10n.text("The plan as JSON, in the Finder"), action: model.revealPlan)
             }
         }
     }
@@ -176,7 +177,7 @@ private struct ConnectionsPane: View {
             Section {
                 ForEach(model.connections) { connection in
                     LabeledContent {
-                        Button(connection.connected ? "Manage…" : "Connect…") { model.openConnection(connection.id) }
+                        Button(connection.connected ? L10n.text("Manage…") : L10n.text("Connect…")) { model.openConnection(connection.id) }
                     } label: {
                         HStack(spacing: 10) {
                             Badge(symbol: connection.symbol, tint: connection.tint)
@@ -192,7 +193,7 @@ private struct ConnectionsPane: View {
                     }
                 }
             } footer: {
-                Footnote("Connections are set up in the editor, where you also link each lamp and AC to its real device. Home Assistant and Hue are shared with a paired iPhone.")
+                Footnote(L10n.text("Connections are set up in the editor, where you also link each lamp and AC to its real device. Home Assistant and Hue are shared with a paired iPhone."))
             }
         }
     }
@@ -205,15 +206,15 @@ private struct PhonePane: View {
         Pane {
             Section {
                 if model.phones.isEmpty {
-                    Label("No iPhone is connected right now", systemImage: "iphone.slash").foregroundStyle(.secondary)
+                    Label(L10n.text("No iPhone is connected right now"), systemImage: "iphone.slash").foregroundStyle(.secondary)
                 } else {
                     ForEach(model.phones, id: \.self) { phone in
                         Label { Text(phone) } icon: { Image(systemName: "iphone").foregroundStyle(.green) }
                     }
                 }
-                ActionRow(symbol: "qrcode", title: "Pair iPhone…", detail: "Show the code to scan with House Control on the iPhone", action: model.pairPhone)
+                ActionRow(symbol: "qrcode", title: L10n.text("Pair iPhone…"), detail: L10n.text("Show the code to scan with House Control on the iPhone"), action: model.pairPhone)
             } footer: {
-                Footnote("Paired, the iPhone gets this floor plan and its connections and keeps them in step with the Mac, whichever one you edit. An iPhone stays connected while its app is open.")
+                Footnote(L10n.text("Paired, the iPhone gets this floor plan and its connections and keeps them in step with the Mac, whichever one you edit. An iPhone stays connected while its app is open."))
             }
         }
     }
@@ -226,20 +227,20 @@ private struct AgentPane: View {
         Pane {
             Section {
                 LabeledContent {
-                    if model.aiLive { Button("Stop", role: .destructive, action: model.stopAgent) }
+                    if model.aiLive { Button(L10n.text("Stop"), role: .destructive, action: model.stopAgent) }
                 } label: {
                     HStack(spacing: 10) {
                         Badge(symbol: "sparkles", tint: .purple)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("AI Access")
-                            Text(model.aiLive ? "Live: an assistant can run your home" : "Off")
+                            Text(L10n.text("AI Access"))
+                            Text(model.aiLive ? L10n.text("Live: an assistant can run your home") : L10n.text("Off"))
                                 .foregroundStyle(model.aiLive ? .green : .secondary).font(.callout)
                         }
                     }
                 }
-                ActionRow(symbol: "link", title: "Open AI Access…", detail: "The link and what an assistant may do", action: model.openAgent)
+                ActionRow(symbol: "link", title: L10n.text("Open AI Access…"), detail: L10n.text("The link and what an assistant may do"), action: model.openAgent)
             } footer: {
-                Footnote("A private link that lets an AI assistant such as Claude or ChatGPT see and switch your home, with the limits you choose. It ends when you stop it or quit House Control.")
+                Footnote(L10n.text("A private link that lets an AI assistant such as Claude or ChatGPT see and switch your home, with the limits you choose. It ends when you stop it or quit House Control."))
             }
         }
     }
@@ -257,22 +258,22 @@ private struct AboutPane: View {
                     Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 56, height: 56)
                     VStack(alignment: .leading, spacing: 3) {
                         Text("House Control").font(.title3.weight(.semibold))
-                        Text(version.isEmpty ? "Development build" : "Version \(version)\(build.isEmpty || build == version ? "" : " (\(build))")")
+                        Text(version.isEmpty ? L10n.text("Development build") : L10n.text("Version {version}", ["version": "\(version)\(build.isEmpty || build == version ? "" : " (\(build))")"]))
                             .foregroundStyle(.secondary)
-                        Text("Your home as a live 3D model, in the menu bar.").foregroundStyle(.secondary).font(.callout)
+                        Text(L10n.text("Your home as a live 3D model, in the menu bar.")).foregroundStyle(.secondary).font(.callout)
                     }
                 }
                 .padding(.vertical, 4)
             }
             Section {
-                LinkRow(symbol: "globe", title: "Website", url: About.website)
-                LinkRow(symbol: "questionmark.circle", title: "Support", url: About.support)
-                LinkRow(symbol: "hand.raised", title: "Privacy Policy", url: About.privacy)
-                LinkRow(symbol: "shippingbox", title: "Source Code", url: About.source)
+                LinkRow(symbol: "globe", title: L10n.text("Website"), url: About.website)
+                LinkRow(symbol: "questionmark.circle", title: L10n.text("Support"), url: About.support)
+                LinkRow(symbol: "hand.raised", title: L10n.text("Privacy Policy"), url: About.privacy)
+                LinkRow(symbol: "shippingbox", title: L10n.text("Source Code"), url: About.source)
                 LinkRow(symbol: "at", title: "\(About.developer) on X", url: About.x)
             }
             Section {
-                ActionRow(symbol: "doc.text.magnifyingglass", title: "Reveal Device Log", detail: "What was sent to your devices, for a bug report", action: model.revealLog)
+                ActionRow(symbol: "doc.text.magnifyingglass", title: L10n.text("Reveal Device Log"), detail: L10n.text("What was sent to your devices, for a bug report"), action: model.revealLog)
             }
         }
     }
@@ -307,7 +308,7 @@ private struct Tip: View {
     let text: String
 
     var body: some View {
-        Label { Text(text) } icon: { Image(systemName: symbol).foregroundStyle(.secondary) }
+        Label { Text(text).fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: symbol).foregroundStyle(.secondary) }
     }
 }
 
@@ -323,8 +324,8 @@ private struct ActionRow: View {
             HStack(spacing: 10) {
                 Image(systemName: symbol).frame(width: 20).foregroundStyle(Color.accentColor)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
-                    Text(detail).font(.callout).foregroundStyle(.secondary)
+                    Text(title).fixedSize(horizontal: false, vertical: true)
+                    Text(detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)

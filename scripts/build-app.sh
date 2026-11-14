@@ -54,6 +54,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/HouseControl"
 cp -R "$ROOT/web/dist" "$APP/Contents/Resources/web"
+cp -R "$ROOT/locales" "$APP/Contents/Resources/locales"
 [ -f "$ROOT/macos/AppIcon.icns" ] && cp "$ROOT/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 if [ -n "${APPEX:-}" ]; then
   mkdir -p "$APP/Contents/PlugIns"
@@ -66,6 +67,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <dict>
   <key>CFBundleName</key><string>House Control</string>
   <key>CFBundleDisplayName</key><string>House Control</string>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>pt-BR</string></array>
   <key>CFBundleIdentifier</key><string>io.github.0xprobabillity.HouseControl</string>
   <key>CFBundleExecutable</key><string>HouseControl</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
