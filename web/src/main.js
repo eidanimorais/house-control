@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { loadRawConfig, normalize, isLinked } from './config.js';
 import { createStore } from './store.js';
 import { createWorld } from './three/world.js';
@@ -9,8 +10,8 @@ import { isNative, isPhone, post, incoming, haptic } from './bridge.js';
 import { publishWidgets, runWidgetAction } from './widgets.js';
 
 const DEMO_PLANS = [
-  { id: 'home', name: 'Demo · Apartment' },
-  { id: 'studio', name: 'Demo · Studio' },
+  { id: 'home', name: t('Demo · Apartment') },
+  { id: 'studio', name: t('Demo · Studio') },
 ];
 const STAGE_INSETS = [62, 50]; // header above, panel overlap below
 
@@ -35,7 +36,7 @@ function safeAreaTop() {
 function fatal(title, error) {
   console.error(error);
   app.replaceChildren(h('div.fatal', h('h1', title),
-    'The floor plan could not be loaded. Fix the file and reload, or pick another plan from the menu bar icon.',
+    t('The floor plan could not be loaded. Fix the file and reload, or pick another plan from the menu bar icon.'),
     h('code', String(error?.message || error))));
   post('ready', { error: String(error?.message || error) });
 }
@@ -47,7 +48,7 @@ async function boot() {
     raw = await loadRawConfig();
     config = normalize(structuredClone(raw));
   } catch (error) {
-    fatal('Could not open this home', error);
+    fatal(t('Could not open this home'), error);
     return;
   }
 
@@ -83,7 +84,7 @@ async function boot() {
       },
     });
   } catch (error) {
-    fatal('3D view failed to start', error);
+    fatal(t('3D view failed to start'), error);
     return;
   }
 
@@ -170,7 +171,7 @@ async function boot() {
     }));
     if (window.__HOUSE_BOOT__?.hasCustomPlan) {
       items.unshift({
-        label: 'My home',
+        label: t('My home'),
         selected: current === 'custom',
         icon: current === 'custom' ? icon('check', 16, 2.4) : null,
         action: () => post('selectPlan', { plan: 'custom' }),
@@ -178,18 +179,18 @@ async function boot() {
     }
     if (isNative) {
       items.push('-',
-        { label: 'Edit home…', action: () => post('openEditor') },
-        { label: 'AI access…', action: () => post('openAgent') },
-        { label: 'Load floor plan…', action: () => post('loadPlan') },
-        { label: 'Reveal plan file', action: () => post('revealPlan') },
+        { label: t('Edit home…'), action: () => post('openEditor') },
+        { label: t('AI access…'), action: () => post('openAgent') },
+        { label: t('Load floor plan…'), action: () => post('loadPlan') },
+        { label: t('Reveal plan file'), action: () => post('revealPlan') },
         '-',
         {
-          label: openAtLogin === 'needsApproval' ? 'Open at login — allow in Settings…' : 'Open at login',
+          label: openAtLogin === 'needsApproval' ? t('Open at login — allow in Settings…') : t('Open at login'),
           icon: openAtLogin === 'on' ? icon('check', 16, 2.4) : null,
           action: () => post('setOpenAtLogin', { on: openAtLogin !== 'on' }),
         },
-        { label: 'Settings…', action: () => post('openSettings') },
-        { label: 'Quit House Control', action: () => post('quit') });
+        { label: t('Settings…'), action: () => post('openSettings') },
+        { label: t('Quit House Control'), action: () => post('quit') });
     }
     openMenu(panel.anchorMenu, anchor, items);
   }
@@ -233,9 +234,9 @@ async function renderShot(config, store, room) {
 const mode = window.__HOUSE_BOOT__?.mode || new URLSearchParams(location.search).get('mode') || 'panel';
 if (mode === 'editor') {
   document.documentElement.classList.add('mode-editor');
-  import('./editor/editor.js').then((m) => m.bootEditor(app)).catch((e) => fatal('Editor failed to start', e));
+  import('./editor/editor.js').then((m) => m.bootEditor(app)).catch((e) => fatal(t('Editor failed to start'), e));
 } else if (mode === 'agent') {
-  import('./agent/console.js').then((m) => m.bootConsole(app)).catch((e) => fatal('AI Access failed to start', e));
+  import('./agent/console.js').then((m) => m.bootConsole(app)).catch((e) => fatal(t('AI Access failed to start'), e));
 } else if (mode === 'island') {
   document.documentElement.classList.add('mode-island');
   import('./island/island.js').then((m) => m.bootIsland(app)).catch((e) => console.error(e));
